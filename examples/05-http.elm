@@ -8,7 +8,7 @@ import Json.Decode as Decode
 
 main =
   Html.program
-    { init = init "cats"
+    { init = init "dogs"
     , view = view
     , update = update
     , subscriptions = subscriptions
@@ -22,12 +22,13 @@ main =
 type alias Model =
   { topic : String
   , gifUrl : String
+  , error : String
   }
 
 
 init : String -> (Model, Cmd Msg)
 init topic =
-  ( Model topic "waiting.gif"
+  ( Model topic "waiting.gif" ""
   , getRandomGif topic
   )
 
@@ -48,10 +49,10 @@ update msg model =
       (model, getRandomGif model.topic)
 
     NewGif (Ok newUrl) ->
-      (Model model.topic newUrl, Cmd.none)
+      ({ model | gifUrl = newUrl } , Cmd.none)
 
-    NewGif (Err _) ->
-      (model, Cmd.none)
+    NewGif (Err err) ->
+      ({ model | error = toString err }, Cmd.none)
 
 
 
@@ -65,6 +66,7 @@ view model =
     , button [ onClick MorePlease ] [ text "More Please!" ]
     , br [] []
     , img [src model.gifUrl] []
+    , div [ style [("color", "red")] ] [ text model.error ]
     ]
 
 
